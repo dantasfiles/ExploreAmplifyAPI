@@ -1,0 +1,75 @@
+#set( $limit = $util.defaultIfNull($context.args.limit, 10) )
+#set( $query = {
+  "expression": "#partitionKey = :partitionKey",
+  "expressionNames": {
+      "#partitionKey": "productID"
+  },
+  "expressionValues": {
+      ":partitionKey": {
+          "S": "$context.source.id"
+    }
+  }
+} )
+## [Start] Applying Key Condition **
+#if( !$util.isNull($ctx.args.warehouseID) && !$util.isNull($ctx.args.warehouseID.beginsWith) )
+  #set( $query.expression = "$query.expression AND begins_with(#sortKey, :sortKey)" )
+  $util.qr($query.expressionNames.put("#sortKey", "warehouseID"))
+  $util.qr($query.expressionValues.put(":sortKey", { "S": "$ctx.args.warehouseID.beginsWith" }))
+#end
+#if( !$util.isNull($ctx.args.warehouseID) && !$util.isNull($ctx.args.warehouseID.between) )
+  #set( $query.expression = "$query.expression AND #sortKey BETWEEN :sortKey0 AND :sortKey1" )
+  $util.qr($query.expressionNames.put("#sortKey", "warehouseID"))
+  $util.qr($query.expressionValues.put(":sortKey0", { "S": "$ctx.args.warehouseID.between[0]" }))
+  $util.qr($query.expressionValues.put(":sortKey1", { "S": "$ctx.args.warehouseID.between[1]" }))
+#end
+#if( !$util.isNull($ctx.args.warehouseID) && !$util.isNull($ctx.args.warehouseID.eq) )
+  #set( $query.expression = "$query.expression AND #sortKey = :sortKey" )
+  $util.qr($query.expressionNames.put("#sortKey", "warehouseID"))
+  $util.qr($query.expressionValues.put(":sortKey", { "S": "$ctx.args.warehouseID.eq" }))
+#end
+#if( !$util.isNull($ctx.args.warehouseID) && !$util.isNull($ctx.args.warehouseID.lt) )
+  #set( $query.expression = "$query.expression AND #sortKey < :sortKey" )
+  $util.qr($query.expressionNames.put("#sortKey", "warehouseID"))
+  $util.qr($query.expressionValues.put(":sortKey", { "S": "$ctx.args.warehouseID.lt" }))
+#end
+#if( !$util.isNull($ctx.args.warehouseID) && !$util.isNull($ctx.args.warehouseID.le) )
+  #set( $query.expression = "$query.expression AND #sortKey <= :sortKey" )
+  $util.qr($query.expressionNames.put("#sortKey", "warehouseID"))
+  $util.qr($query.expressionValues.put(":sortKey", { "S": "$ctx.args.warehouseID.le" }))
+#end
+#if( !$util.isNull($ctx.args.warehouseID) && !$util.isNull($ctx.args.warehouseID.gt) )
+  #set( $query.expression = "$query.expression AND #sortKey > :sortKey" )
+  $util.qr($query.expressionNames.put("#sortKey", "warehouseID"))
+  $util.qr($query.expressionValues.put(":sortKey", { "S": "$ctx.args.warehouseID.gt" }))
+#end
+#if( !$util.isNull($ctx.args.warehouseID) && !$util.isNull($ctx.args.warehouseID.ge) )
+  #set( $query.expression = "$query.expression AND #sortKey >= :sortKey" )
+  $util.qr($query.expressionNames.put("#sortKey", "warehouseID"))
+  $util.qr($query.expressionValues.put(":sortKey", { "S": "$ctx.args.warehouseID.ge" }))
+#end
+## [End] Applying Key Condition **
+{
+  "version": "2017-02-28",
+  "operation": "Query",
+  "query":   $util.toJson($query),
+  "scanIndexForward":   #if( $context.args.sortDirection )
+    #if( $context.args.sortDirection == "ASC" )
+true
+    #else
+false
+    #end
+  #else
+true
+  #end,
+  "filter":   #if( $context.args.filter )
+$util.transform.toDynamoDBFilterExpression($ctx.args.filter)
+  #else
+null
+  #end,
+  "limit": $limit,
+  "nextToken":   #if( $context.args.nextToken )
+"$context.args.nextToken"
+  #else
+null
+  #end
+}

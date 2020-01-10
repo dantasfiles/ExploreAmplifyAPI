@@ -1,0 +1,99 @@
+#set( $limit = $util.defaultIfNull($context.args.limit, 10) )
+#set( $query = {
+  "expression": "#partitionKey = :partitionKey",
+  "expressionNames": {
+      "#partitionKey": "customerID"
+  },
+  "expressionValues": {
+      ":partitionKey": {
+          "S": "$context.source.id"
+    }
+  }
+} )
+## [Start] Applying Key Condition **
+#set( $sortKeyValue = "" )
+#set( $sortKeyValue2 = "" )
+#if( !$util.isNull($ctx.args.statusDate) && !$util.isNull($ctx.args.statusDate.beginsWith) )
+#if( !$util.isNull($ctx.args.statusDate.beginsWith.status) ) #set( $sortKeyValue = "$ctx.args.statusDate.beginsWith.status" ) #end
+#if( !$util.isNull($ctx.args.statusDate.beginsWith.date) ) #set( $sortKeyValue = "$sortKeyValue#$ctx.args.statusDate.beginsWith.date" ) #end
+  #set( $query.expression = "$query.expression AND begins_with(#sortKey, :sortKey)" )
+  $util.qr($query.expressionNames.put("#sortKey", "status#date"))
+  $util.qr($query.expressionValues.put(":sortKey", { "S": "$sortKeyValue" }))
+#end
+#if( !$util.isNull($ctx.args.statusDate) && !$util.isNull($ctx.args.statusDate.between) )
+  #if( $ctx.args.statusDate.between.size() != 2 )
+    $util.error("Argument statusDate.between expects exactly 2 elements.")
+  #end
+#if( !$util.isNull($ctx.args.statusDate.between[0].status) ) #set( $sortKeyValue = "$ctx.args.statusDate.between[0].status" ) #end
+#if( !$util.isNull($ctx.args.statusDate.between[0].date) ) #set( $sortKeyValue = "$sortKeyValue#$ctx.args.statusDate.between[0].date" ) #end
+#if( !$util.isNull($ctx.args.statusDate.between[1].status) ) #set( $sortKeyValue2 = "$ctx.args.statusDate.between[1].status" ) #end
+#if( !$util.isNull($ctx.args.statusDate.between[1].date) ) #set( $sortKeyValue2 = "$sortKeyValue2#$ctx.args.statusDate.between[1].date" ) #end
+  #set( $query.expression = "$query.expression AND #sortKey BETWEEN :sortKey0 AND :sortKey1" )
+  $util.qr($query.expressionNames.put("#sortKey", "status#date"))
+  $util.qr($query.expressionValues.put(":sortKey0", { "S": "$sortKeyValue" }))
+  $util.qr($query.expressionValues.put(":sortKey1", { "S": "$sortKeyValue2" }))
+#end
+#if( !$util.isNull($ctx.args.statusDate) && !$util.isNull($ctx.args.statusDate.eq) )
+#if( !$util.isNull($ctx.args.statusDate.eq.status) ) #set( $sortKeyValue = "$ctx.args.statusDate.eq.status" ) #end
+#if( !$util.isNull($ctx.args.statusDate.eq.date) ) #set( $sortKeyValue = "$sortKeyValue#$ctx.args.statusDate.eq.date" ) #end
+  #set( $query.expression = "$query.expression AND #sortKey = :sortKey" )
+  $util.qr($query.expressionNames.put("#sortKey", "status#date"))
+  $util.qr($query.expressionValues.put(":sortKey", { "S": "$sortKeyValue" }))
+#end
+#if( !$util.isNull($ctx.args.statusDate) && !$util.isNull($ctx.args.statusDate.lt) )
+#if( !$util.isNull($ctx.args.statusDate.lt.status) ) #set( $sortKeyValue = "$ctx.args.statusDate.lt.status" ) #end
+#if( !$util.isNull($ctx.args.statusDate.lt.date) ) #set( $sortKeyValue = "$sortKeyValue#$ctx.args.statusDate.lt.date" ) #end
+  #set( $query.expression = "$query.expression AND #sortKey < :sortKey" )
+  $util.qr($query.expressionNames.put("#sortKey", "status#date"))
+  $util.qr($query.expressionValues.put(":sortKey", { "S": "$sortKeyValue" }))
+#end
+#if( !$util.isNull($ctx.args.statusDate) && !$util.isNull($ctx.args.statusDate.le) )
+#if( !$util.isNull($ctx.args.statusDate.le.status) ) #set( $sortKeyValue = "$ctx.args.statusDate.le.status" ) #end
+#if( !$util.isNull($ctx.args.statusDate.le.date) ) #set( $sortKeyValue = "$sortKeyValue#$ctx.args.statusDate.le.date" ) #end
+  #set( $query.expression = "$query.expression AND #sortKey <= :sortKey" )
+  $util.qr($query.expressionNames.put("#sortKey", "status#date"))
+  $util.qr($query.expressionValues.put(":sortKey", { "S": "$sortKeyValue" }))
+#end
+#if( !$util.isNull($ctx.args.statusDate) && !$util.isNull($ctx.args.statusDate.gt) )
+#if( !$util.isNull($ctx.args.statusDate.gt.status) ) #set( $sortKeyValue = "$ctx.args.statusDate.gt.status" ) #end
+#if( !$util.isNull($ctx.args.statusDate.gt.date) ) #set( $sortKeyValue = "$sortKeyValue#$ctx.args.statusDate.gt.date" ) #end
+  #set( $query.expression = "$query.expression AND #sortKey > :sortKey" )
+  $util.qr($query.expressionNames.put("#sortKey", "status#date"))
+  $util.qr($query.expressionValues.put(":sortKey", { "S": "$sortKeyValue" }))
+#end
+#if( !$util.isNull($ctx.args.statusDate) && !$util.isNull($ctx.args.statusDate.ge) )
+#if( !$util.isNull($ctx.args.statusDate.ge.status) ) #set( $sortKeyValue = "$ctx.args.statusDate.ge.status" ) #end
+#if( !$util.isNull($ctx.args.statusDate.ge.date) ) #set( $sortKeyValue = "$sortKeyValue#$ctx.args.statusDate.ge.date" ) #end
+  #set( $query.expression = "$query.expression AND #sortKey >= :sortKey" )
+  $util.qr($query.expressionNames.put("#sortKey", "status#date"))
+  $util.qr($query.expressionValues.put(":sortKey", { "S": "$sortKeyValue" }))
+#end
+
+
+## [End] Applying Key Condition **
+{
+  "version": "2017-02-28",
+  "operation": "Query",
+  "query":   $util.toJson($query),
+  "scanIndexForward":   #if( $context.args.sortDirection )
+    #if( $context.args.sortDirection == "ASC" )
+true
+    #else
+false
+    #end
+  #else
+true
+  #end,
+  "filter":   #if( $context.args.filter )
+$util.transform.toDynamoDBFilterExpression($ctx.args.filter)
+  #else
+null
+  #end,
+  "limit": $limit,
+  "nextToken":   #if( $context.args.nextToken )
+"$context.args.nextToken"
+  #else
+null
+  #end,
+  "index": "byCustomerByStatusByDate"
+}

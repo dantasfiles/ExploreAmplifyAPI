@@ -1,0 +1,550 @@
+type Order {
+  id: ID!
+  customerID: ID!
+  accountRepresentativeID: ID!
+  productID: ID!
+  status: String!
+  amount: Int!
+  date: String!
+}
+
+type Customer {
+  id: ID!
+  name: String!
+  phoneNumber: String
+  accountRepresentativeID: ID!
+  ordersByDate(date: ModelStringKeyConditionInput, filter: ModelOrderFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelOrderConnection
+  ordersByStatusDate(statusDate: ModelOrderByCustomerByStatusByDateCompositeKeyConditionInput, filter: ModelOrderFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelOrderConnection
+}
+
+type Employee {
+  id: ID!
+  name: String!
+  startDate: String!
+  phoneNumber: String!
+  warehouseID: ID!
+  jobTitle: String!
+  newHire: String!
+}
+
+type Warehouse {
+  id: ID!
+  employees(id: ModelIDKeyConditionInput, filter: ModelEmployeeFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelEmployeeConnection
+}
+
+type AccountRepresentative {
+  id: ID!
+  customers(id: ModelIDKeyConditionInput, filter: ModelCustomerFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelCustomerConnection
+  orders(date: ModelStringKeyConditionInput, filter: ModelOrderFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelOrderConnection
+  orderTotal: Int
+  salesPeriod: String
+}
+
+type Inventory {
+  productID: ID!
+  warehouseID: ID!
+  inventoryAmount: Int!
+}
+
+type Product {
+  id: ID!
+  name: String!
+  orders(id: ModelIDKeyConditionInput, filter: ModelOrderFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelOrderConnection
+  inventories(warehouseID: ModelIDKeyConditionInput, filter: ModelInventoryFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelInventoryConnection
+}
+
+enum ModelSortDirection {
+  ASC
+  DESC
+}
+
+type ModelOrderConnection {
+  items: [Order]
+  nextToken: String
+}
+
+input ModelStringInput {
+  ne: String
+  eq: String
+  le: String
+  lt: String
+  ge: String
+  gt: String
+  contains: String
+  notContains: String
+  between: [String]
+  beginsWith: String
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+  size: ModelSizeInput
+}
+
+input ModelIDInput {
+  ne: ID
+  eq: ID
+  le: ID
+  lt: ID
+  ge: ID
+  gt: ID
+  contains: ID
+  notContains: ID
+  between: [ID]
+  beginsWith: ID
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+  size: ModelSizeInput
+}
+
+input ModelIntInput {
+  ne: Int
+  eq: Int
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  between: [Int]
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+}
+
+input ModelFloatInput {
+  ne: Float
+  eq: Float
+  le: Float
+  lt: Float
+  ge: Float
+  gt: Float
+  between: [Float]
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+}
+
+input ModelBooleanInput {
+  ne: Boolean
+  eq: Boolean
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+}
+
+input ModelSizeInput {
+  ne: Int
+  eq: Int
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  between: [Int]
+}
+
+input ModelOrderFilterInput {
+  id: ModelIDInput
+  customerID: ModelIDInput
+  accountRepresentativeID: ModelIDInput
+  productID: ModelIDInput
+  status: ModelStringInput
+  amount: ModelIntInput
+  date: ModelStringInput
+  and: [ModelOrderFilterInput]
+  or: [ModelOrderFilterInput]
+  not: ModelOrderFilterInput
+}
+
+type Query {
+  getOrder(id: ID!): Order
+  listOrders(filter: ModelOrderFilterInput, limit: Int, nextToken: String): ModelOrderConnection
+  getCustomer(id: ID!): Customer
+  listCustomers(filter: ModelCustomerFilterInput, limit: Int, nextToken: String): ModelCustomerConnection
+  getEmployee(id: ID!): Employee
+  listEmployees(filter: ModelEmployeeFilterInput, limit: Int, nextToken: String): ModelEmployeeConnection
+  getWarehouse(id: ID!): Warehouse
+  listWarehouses(filter: ModelWarehouseFilterInput, limit: Int, nextToken: String): ModelWarehouseConnection
+  getAccountRepresentative(id: ID!): AccountRepresentative
+  listAccountRepresentatives(filter: ModelAccountRepresentativeFilterInput, limit: Int, nextToken: String): ModelAccountRepresentativeConnection
+  getInventory(productID: ID!, warehouseID: ID!): Inventory
+  listInventorys(productID: ID, warehouseID: ModelIDKeyConditionInput, filter: ModelInventoryFilterInput, limit: Int, nextToken: String, sortDirection: ModelSortDirection): ModelInventoryConnection
+  getProduct(id: ID!): Product
+  listProducts(filter: ModelProductFilterInput, limit: Int, nextToken: String): ModelProductConnection
+  employeesNewHire(newHire: String, id: ModelIDKeyConditionInput, sortDirection: ModelSortDirection, filter: ModelEmployeeFilterInput, limit: Int, nextToken: String): ModelEmployeeConnection
+  employeesNewHireByStartDate(newHire: String, startDate: ModelStringKeyConditionInput, sortDirection: ModelSortDirection, filter: ModelEmployeeFilterInput, limit: Int, nextToken: String): ModelEmployeeConnection
+  employeeByName(name: String, id: ModelIDKeyConditionInput, sortDirection: ModelSortDirection, filter: ModelEmployeeFilterInput, limit: Int, nextToken: String): ModelEmployeeConnection
+  employeesByJobTitle(jobTitle: String, id: ModelIDKeyConditionInput, sortDirection: ModelSortDirection, filter: ModelEmployeeFilterInput, limit: Int, nextToken: String): ModelEmployeeConnection
+  repsByPeriodAndTotal(salesPeriod: String, orderTotal: ModelIntKeyConditionInput, sortDirection: ModelSortDirection, filter: ModelAccountRepresentativeFilterInput, limit: Int, nextToken: String): ModelAccountRepresentativeConnection
+  itemsByWarehouseID(warehouseID: ID, sortDirection: ModelSortDirection, filter: ModelInventoryFilterInput, limit: Int, nextToken: String): ModelInventoryConnection
+}
+
+input CreateOrderInput {
+  id: ID
+  customerID: ID!
+  accountRepresentativeID: ID!
+  productID: ID!
+  status: String!
+  amount: Int!
+  date: String!
+}
+
+input UpdateOrderInput {
+  id: ID!
+  customerID: ID
+  accountRepresentativeID: ID
+  productID: ID
+  status: String
+  amount: Int
+  date: String
+}
+
+input DeleteOrderInput {
+  id: ID
+}
+
+type Mutation {
+  createOrder(input: CreateOrderInput!, condition: ModelOrderConditionInput): Order
+  updateOrder(input: UpdateOrderInput!, condition: ModelOrderConditionInput): Order
+  deleteOrder(input: DeleteOrderInput!, condition: ModelOrderConditionInput): Order
+  createCustomer(input: CreateCustomerInput!, condition: ModelCustomerConditionInput): Customer
+  updateCustomer(input: UpdateCustomerInput!, condition: ModelCustomerConditionInput): Customer
+  deleteCustomer(input: DeleteCustomerInput!, condition: ModelCustomerConditionInput): Customer
+  createEmployee(input: CreateEmployeeInput!, condition: ModelEmployeeConditionInput): Employee
+  updateEmployee(input: UpdateEmployeeInput!, condition: ModelEmployeeConditionInput): Employee
+  deleteEmployee(input: DeleteEmployeeInput!, condition: ModelEmployeeConditionInput): Employee
+  createWarehouse(input: CreateWarehouseInput!, condition: ModelWarehouseConditionInput): Warehouse
+  updateWarehouse(input: UpdateWarehouseInput!, condition: ModelWarehouseConditionInput): Warehouse
+  deleteWarehouse(input: DeleteWarehouseInput!, condition: ModelWarehouseConditionInput): Warehouse
+  createAccountRepresentative(input: CreateAccountRepresentativeInput!, condition: ModelAccountRepresentativeConditionInput): AccountRepresentative
+  updateAccountRepresentative(input: UpdateAccountRepresentativeInput!, condition: ModelAccountRepresentativeConditionInput): AccountRepresentative
+  deleteAccountRepresentative(input: DeleteAccountRepresentativeInput!, condition: ModelAccountRepresentativeConditionInput): AccountRepresentative
+  createInventory(input: CreateInventoryInput!, condition: ModelInventoryConditionInput): Inventory
+  updateInventory(input: UpdateInventoryInput!, condition: ModelInventoryConditionInput): Inventory
+  deleteInventory(input: DeleteInventoryInput!, condition: ModelInventoryConditionInput): Inventory
+  createProduct(input: CreateProductInput!, condition: ModelProductConditionInput): Product
+  updateProduct(input: UpdateProductInput!, condition: ModelProductConditionInput): Product
+  deleteProduct(input: DeleteProductInput!, condition: ModelProductConditionInput): Product
+}
+
+input ModelOrderConditionInput {
+  customerID: ModelIDInput
+  accountRepresentativeID: ModelIDInput
+  productID: ModelIDInput
+  status: ModelStringInput
+  amount: ModelIntInput
+  date: ModelStringInput
+  and: [ModelOrderConditionInput]
+  or: [ModelOrderConditionInput]
+  not: ModelOrderConditionInput
+}
+
+enum ModelAttributeTypes {
+  binary
+  binarySet
+  bool
+  list
+  map
+  number
+  numberSet
+  string
+  stringSet
+  _null
+}
+
+type Subscription {
+  onCreateOrder: Order @aws_subscribe(mutations: ["createOrder"])
+  onUpdateOrder: Order @aws_subscribe(mutations: ["updateOrder"])
+  onDeleteOrder: Order @aws_subscribe(mutations: ["deleteOrder"])
+  onCreateCustomer: Customer @aws_subscribe(mutations: ["createCustomer"])
+  onUpdateCustomer: Customer @aws_subscribe(mutations: ["updateCustomer"])
+  onDeleteCustomer: Customer @aws_subscribe(mutations: ["deleteCustomer"])
+  onCreateEmployee: Employee @aws_subscribe(mutations: ["createEmployee"])
+  onUpdateEmployee: Employee @aws_subscribe(mutations: ["updateEmployee"])
+  onDeleteEmployee: Employee @aws_subscribe(mutations: ["deleteEmployee"])
+  onCreateWarehouse: Warehouse @aws_subscribe(mutations: ["createWarehouse"])
+  onUpdateWarehouse: Warehouse @aws_subscribe(mutations: ["updateWarehouse"])
+  onDeleteWarehouse: Warehouse @aws_subscribe(mutations: ["deleteWarehouse"])
+  onCreateAccountRepresentative: AccountRepresentative @aws_subscribe(mutations: ["createAccountRepresentative"])
+  onUpdateAccountRepresentative: AccountRepresentative @aws_subscribe(mutations: ["updateAccountRepresentative"])
+  onDeleteAccountRepresentative: AccountRepresentative @aws_subscribe(mutations: ["deleteAccountRepresentative"])
+  onCreateInventory: Inventory @aws_subscribe(mutations: ["createInventory"])
+  onUpdateInventory: Inventory @aws_subscribe(mutations: ["updateInventory"])
+  onDeleteInventory: Inventory @aws_subscribe(mutations: ["deleteInventory"])
+  onCreateProduct: Product @aws_subscribe(mutations: ["createProduct"])
+  onUpdateProduct: Product @aws_subscribe(mutations: ["updateProduct"])
+  onDeleteProduct: Product @aws_subscribe(mutations: ["deleteProduct"])
+}
+
+type ModelCustomerConnection {
+  items: [Customer]
+  nextToken: String
+}
+
+input ModelCustomerFilterInput {
+  id: ModelIDInput
+  name: ModelStringInput
+  phoneNumber: ModelStringInput
+  accountRepresentativeID: ModelIDInput
+  and: [ModelCustomerFilterInput]
+  or: [ModelCustomerFilterInput]
+  not: ModelCustomerFilterInput
+}
+
+input CreateCustomerInput {
+  id: ID
+  name: String!
+  phoneNumber: String
+  accountRepresentativeID: ID!
+}
+
+input UpdateCustomerInput {
+  id: ID!
+  name: String
+  phoneNumber: String
+  accountRepresentativeID: ID
+}
+
+input DeleteCustomerInput {
+  id: ID
+}
+
+input ModelCustomerConditionInput {
+  name: ModelStringInput
+  phoneNumber: ModelStringInput
+  accountRepresentativeID: ModelIDInput
+  and: [ModelCustomerConditionInput]
+  or: [ModelCustomerConditionInput]
+  not: ModelCustomerConditionInput
+}
+
+type ModelEmployeeConnection {
+  items: [Employee]
+  nextToken: String
+}
+
+input ModelEmployeeFilterInput {
+  id: ModelIDInput
+  name: ModelStringInput
+  startDate: ModelStringInput
+  phoneNumber: ModelStringInput
+  warehouseID: ModelIDInput
+  jobTitle: ModelStringInput
+  newHire: ModelStringInput
+  and: [ModelEmployeeFilterInput]
+  or: [ModelEmployeeFilterInput]
+  not: ModelEmployeeFilterInput
+}
+
+input CreateEmployeeInput {
+  id: ID
+  name: String!
+  startDate: String!
+  phoneNumber: String!
+  warehouseID: ID!
+  jobTitle: String!
+  newHire: String!
+}
+
+input UpdateEmployeeInput {
+  id: ID!
+  name: String
+  startDate: String
+  phoneNumber: String
+  warehouseID: ID
+  jobTitle: String
+  newHire: String
+}
+
+input DeleteEmployeeInput {
+  id: ID
+}
+
+input ModelEmployeeConditionInput {
+  name: ModelStringInput
+  startDate: ModelStringInput
+  phoneNumber: ModelStringInput
+  warehouseID: ModelIDInput
+  jobTitle: ModelStringInput
+  newHire: ModelStringInput
+  and: [ModelEmployeeConditionInput]
+  or: [ModelEmployeeConditionInput]
+  not: ModelEmployeeConditionInput
+}
+
+type ModelWarehouseConnection {
+  items: [Warehouse]
+  nextToken: String
+}
+
+input ModelWarehouseFilterInput {
+  id: ModelIDInput
+  and: [ModelWarehouseFilterInput]
+  or: [ModelWarehouseFilterInput]
+  not: ModelWarehouseFilterInput
+}
+
+input CreateWarehouseInput {
+  id: ID
+}
+
+input UpdateWarehouseInput {
+  id: ID!
+}
+
+input DeleteWarehouseInput {
+  id: ID
+}
+
+input ModelWarehouseConditionInput {
+  and: [ModelWarehouseConditionInput]
+  or: [ModelWarehouseConditionInput]
+  not: ModelWarehouseConditionInput
+}
+
+type ModelAccountRepresentativeConnection {
+  items: [AccountRepresentative]
+  nextToken: String
+}
+
+input ModelAccountRepresentativeFilterInput {
+  id: ModelIDInput
+  orderTotal: ModelIntInput
+  salesPeriod: ModelStringInput
+  and: [ModelAccountRepresentativeFilterInput]
+  or: [ModelAccountRepresentativeFilterInput]
+  not: ModelAccountRepresentativeFilterInput
+}
+
+input CreateAccountRepresentativeInput {
+  id: ID
+  orderTotal: Int
+  salesPeriod: String
+}
+
+input UpdateAccountRepresentativeInput {
+  id: ID!
+  orderTotal: Int
+  salesPeriod: String
+}
+
+input DeleteAccountRepresentativeInput {
+  id: ID
+}
+
+input ModelAccountRepresentativeConditionInput {
+  orderTotal: ModelIntInput
+  salesPeriod: ModelStringInput
+  and: [ModelAccountRepresentativeConditionInput]
+  or: [ModelAccountRepresentativeConditionInput]
+  not: ModelAccountRepresentativeConditionInput
+}
+
+type ModelInventoryConnection {
+  items: [Inventory]
+  nextToken: String
+}
+
+input ModelInventoryFilterInput {
+  productID: ModelIDInput
+  warehouseID: ModelIDInput
+  inventoryAmount: ModelIntInput
+  and: [ModelInventoryFilterInput]
+  or: [ModelInventoryFilterInput]
+  not: ModelInventoryFilterInput
+}
+
+input CreateInventoryInput {
+  productID: ID!
+  warehouseID: ID!
+  inventoryAmount: Int!
+}
+
+input UpdateInventoryInput {
+  productID: ID!
+  warehouseID: ID!
+  inventoryAmount: Int
+}
+
+input DeleteInventoryInput {
+  productID: ID!
+  warehouseID: ID!
+}
+
+input ModelInventoryConditionInput {
+  inventoryAmount: ModelIntInput
+  and: [ModelInventoryConditionInput]
+  or: [ModelInventoryConditionInput]
+  not: ModelInventoryConditionInput
+}
+
+type ModelProductConnection {
+  items: [Product]
+  nextToken: String
+}
+
+input ModelProductFilterInput {
+  id: ModelIDInput
+  name: ModelStringInput
+  and: [ModelProductFilterInput]
+  or: [ModelProductFilterInput]
+  not: ModelProductFilterInput
+}
+
+input CreateProductInput {
+  id: ID
+  name: String!
+}
+
+input UpdateProductInput {
+  id: ID!
+  name: String
+}
+
+input DeleteProductInput {
+  id: ID
+}
+
+input ModelProductConditionInput {
+  name: ModelStringInput
+  and: [ModelProductConditionInput]
+  or: [ModelProductConditionInput]
+  not: ModelProductConditionInput
+}
+
+input ModelOrderByCustomerByStatusByDateCompositeKeyConditionInput {
+  eq: ModelOrderByCustomerByStatusByDateCompositeKeyInput
+  le: ModelOrderByCustomerByStatusByDateCompositeKeyInput
+  lt: ModelOrderByCustomerByStatusByDateCompositeKeyInput
+  ge: ModelOrderByCustomerByStatusByDateCompositeKeyInput
+  gt: ModelOrderByCustomerByStatusByDateCompositeKeyInput
+  between: [ModelOrderByCustomerByStatusByDateCompositeKeyInput]
+  beginsWith: ModelOrderByCustomerByStatusByDateCompositeKeyInput
+}
+
+input ModelOrderByCustomerByStatusByDateCompositeKeyInput {
+  status: String
+  date: String
+}
+
+input ModelStringKeyConditionInput {
+  eq: String
+  le: String
+  lt: String
+  ge: String
+  gt: String
+  between: [String]
+  beginsWith: String
+}
+
+input ModelIDKeyConditionInput {
+  eq: ID
+  le: ID
+  lt: ID
+  ge: ID
+  gt: ID
+  between: [ID]
+  beginsWith: ID
+}
+
+input ModelIntKeyConditionInput {
+  eq: Int
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  between: [Int]
+}

@@ -1,0 +1,74 @@
+## [Start] Set query expression for @key **
+#set( $modelQueryExpression = {} )
+## [Start] Validate key arguments. **
+#if( !$util.isNull($ctx.args.orderTotal) && $util.isNull($ctx.args.salesPeriod) )
+  $util.error("When providing argument 'orderTotal' you must also provide arguments salesPeriod", "InvalidArgumentsError")
+#end
+## [End] Validate key arguments. **
+#if( !$util.isNull($ctx.args.salesPeriod) )
+  #set( $modelQueryExpression.expression = "#salesPeriod = :salesPeriod" )
+  #set( $modelQueryExpression.expressionNames = {
+  "#salesPeriod": "salesPeriod"
+} )
+  #set( $modelQueryExpression.expressionValues = {
+  ":salesPeriod": {
+      "S": "$ctx.args.salesPeriod"
+  }
+} )
+#end
+## [Start] Applying Key Condition **
+#if( !$util.isNull($ctx.args.orderTotal) && !$util.isNull($ctx.args.orderTotal.beginsWith) )
+  #set( $modelQueryExpression.expression = "$modelQueryExpression.expression AND begins_with(#sortKey, :sortKey)" )
+  $util.qr($modelQueryExpression.expressionNames.put("#sortKey", "orderTotal"))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey", { "N": "$ctx.args.orderTotal.beginsWith" }))
+#end
+#if( !$util.isNull($ctx.args.orderTotal) && !$util.isNull($ctx.args.orderTotal.between) )
+  #set( $modelQueryExpression.expression = "$modelQueryExpression.expression AND #sortKey BETWEEN :sortKey0 AND :sortKey1" )
+  $util.qr($modelQueryExpression.expressionNames.put("#sortKey", "orderTotal"))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey0", { "N": "$ctx.args.orderTotal.between[0]" }))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey1", { "N": "$ctx.args.orderTotal.between[1]" }))
+#end
+#if( !$util.isNull($ctx.args.orderTotal) && !$util.isNull($ctx.args.orderTotal.eq) )
+  #set( $modelQueryExpression.expression = "$modelQueryExpression.expression AND #sortKey = :sortKey" )
+  $util.qr($modelQueryExpression.expressionNames.put("#sortKey", "orderTotal"))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey", { "N": "$ctx.args.orderTotal.eq" }))
+#end
+#if( !$util.isNull($ctx.args.orderTotal) && !$util.isNull($ctx.args.orderTotal.lt) )
+  #set( $modelQueryExpression.expression = "$modelQueryExpression.expression AND #sortKey < :sortKey" )
+  $util.qr($modelQueryExpression.expressionNames.put("#sortKey", "orderTotal"))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey", { "N": "$ctx.args.orderTotal.lt" }))
+#end
+#if( !$util.isNull($ctx.args.orderTotal) && !$util.isNull($ctx.args.orderTotal.le) )
+  #set( $modelQueryExpression.expression = "$modelQueryExpression.expression AND #sortKey <= :sortKey" )
+  $util.qr($modelQueryExpression.expressionNames.put("#sortKey", "orderTotal"))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey", { "N": "$ctx.args.orderTotal.le" }))
+#end
+#if( !$util.isNull($ctx.args.orderTotal) && !$util.isNull($ctx.args.orderTotal.gt) )
+  #set( $modelQueryExpression.expression = "$modelQueryExpression.expression AND #sortKey > :sortKey" )
+  $util.qr($modelQueryExpression.expressionNames.put("#sortKey", "orderTotal"))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey", { "N": "$ctx.args.orderTotal.gt" }))
+#end
+#if( !$util.isNull($ctx.args.orderTotal) && !$util.isNull($ctx.args.orderTotal.ge) )
+  #set( $modelQueryExpression.expression = "$modelQueryExpression.expression AND #sortKey >= :sortKey" )
+  $util.qr($modelQueryExpression.expressionNames.put("#sortKey", "orderTotal"))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey", { "N": "$ctx.args.orderTotal.ge" }))
+#end
+## [End] Applying Key Condition **
+## [End] Set query expression for @key **
+#set( $limit = $util.defaultIfNull($context.args.limit, 10) )
+#set( $QueryRequest = {
+  "version": "2017-02-28",
+  "operation": "Query",
+  "limit": $limit,
+  "query": $modelQueryExpression,
+  "index": "bySalesPeriodByOrderTotal"
+} )
+#if( !$util.isNull($ctx.args.sortDirection)
+                    && $ctx.args.sortDirection == "DESC" )
+  #set( $QueryRequest.scanIndexForward = false )
+#else
+  #set( $QueryRequest.scanIndexForward = true )
+#end
+#if( $context.args.nextToken ) #set( $QueryRequest.nextToken = "$context.args.nextToken" ) #end
+#if( $context.args.filter ) #set( $QueryRequest.filter = $util.parseJson("$util.transform.toDynamoDBFilterExpression($ctx.args.filter)") ) #end
+$util.toJson($QueryRequest)
