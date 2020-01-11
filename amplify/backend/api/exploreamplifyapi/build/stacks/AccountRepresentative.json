@@ -1,0 +1,44 @@
+{
+  "Resources": {
+    "AccountRepresentativeTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          }
+        ],
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "salesPeriod",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "orderTotal",
+            "AttributeType": "N"
+          }
+        ],
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "bySalesPeriodByOrderTotal",
+            "KeySchema": [
+              {
+                "AttributeName": "salesPeriod",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "orderTotal",
+                "KeyType": "RANGE"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
